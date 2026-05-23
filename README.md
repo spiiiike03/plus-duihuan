@@ -7,7 +7,7 @@
 - 售后QQ群：1072653807
 - 售后QQ群链接：https://qm.qq.com/q/GmN6NYIh6c
 - 代理QQ：191176548
-- 代理QQ链接：https://qm.qq.com/q/3fzTa4zK6k
+- 代理QQ链接：https://qm.qq.com/q/Bz7bx904XQ
 
 ## 本地运行
 

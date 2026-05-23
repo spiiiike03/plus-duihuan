@@ -8,7 +8,7 @@ const ASSET_VERSION = "1778483770";
 const QQ_GROUP_NUMBER = "1072653807";
 const QQ_GROUP_LINK = "https://qm.qq.com/q/GmN6NYIh6c";
 const AGENT_QQ_NUMBER = "191176548";
-const AGENT_QQ_LINK = "https://qm.qq.com/q/3fzTa4zK6k";
+const AGENT_QQ_LINK = "https://qm.qq.com/q/Bz7bx904XQ";
 
 const HTML = `<!doctype html>
 <html lang="zh-CN">
@@ -76,6 +76,20 @@ function responseHeaders(response, extra = {}) {
 
 function replaceContacts(source) {
   return source
+    .replace(
+      /const\s+SUPPORT_QQ\s*=\s*\{\s*code:\s*".*?",\s*link:\s*".*?",?\s*\};/s,
+      `const SUPPORT_QQ = {
+    code: "${QQ_GROUP_NUMBER}",
+    link: "${QQ_GROUP_LINK}",
+  };`
+    )
+    .replace(
+      /const\s+AGENT_QQ\s*=\s*\{\s*code:\s*".*?",\s*link:\s*".*?",?\s*\};/s,
+      `const AGENT_QQ = {
+    code: "${AGENT_QQ_NUMBER}",
+    link: "${AGENT_QQ_LINK}",
+  };`
+    )
     .replace(
       /const QQ_GROUP_NUMBER = ".*?";/,
       `const QQ_GROUP_NUMBER = "${QQ_GROUP_NUMBER}";`
