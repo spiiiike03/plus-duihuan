@@ -9,6 +9,7 @@ const QQ_GROUP_NUMBER = "1072653807";
 const QQ_GROUP_LINK = "https://qm.qq.com/q/GmN6NYIh6c";
 const AGENT_QQ_NUMBER = "191176548";
 const AGENT_QQ_LINK = "https://qm.qq.com/q/Bz7bx904XQ";
+const CODEX_PURCHASE_LINK = "https://pay.ldxp.cn/item/jzpods";
 
 const HTML = `<!doctype html>
 <html lang="zh-CN">
@@ -108,6 +109,36 @@ function replaceContacts(source) {
     );
 }
 
+function replacePurchaseLinkInConfig(buffer) {
+  const text = buffer.toString("utf8");
+  try {
+    const data = JSON.parse(text);
+    if (typeof data.service_notice === "string") {
+      data.service_notice = data.service_notice.replace(
+        /(codex\s*接码购买链接[：:]\s*)https?:\/\/[^\s*=\n]+/i,
+        `$1${CODEX_PURCHASE_LINK}`
+      );
+    }
+    return Buffer.from(JSON.stringify(data));
+  } catch (error) {
+    return Buffer.from(text.replace(/https:\/\/pay\.ldxp\.cn\/item\/[A-Za-z0-9_-]+/g, CODEX_PURCHASE_LINK));
+  }
+}
+
+async function proxyPage(res) {
+  const response = await fetch(`${OLD_ORIGIN}/activate`, {
+    headers: {
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome Safari",
+      "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    },
+  });
+  const body = await response.text();
+  send(res, response.status, responseHeaders(response, {
+    "content-type": "text/html; charset=utf-8",
+    "cache-control": "no-store",
+  }), body);
+}
+
 async function proxyStatic(req, res, pathname, search) {
   const versionedSearch = search || `?v=${ASSET_VERSION}`;
   const oldPath = pathname === "/static/js/reserve_activate_console.js"
@@ -136,8 +167,14 @@ async function proxyApi(req, res, pathname, search) {
     body,
     redirect: "manual",
   });
-  const responseBody = Buffer.from(await response.arrayBuffer());
-  send(res, response.status, responseHeaders(response), responseBody);
+  let responseBody = Buffer.from(await response.arrayBuffer());
+  const extraHeaders = {};
+  if (pathname === "/api/public/plus-gopay-redeem-config" && response.ok) {
+    responseBody = replacePurchaseLinkInConfig(responseBody);
+    extraHeaders["content-type"] = "application/json; charset=utf-8";
+    extraHeaders["cache-control"] = "no-store";
+  }
+  send(res, response.status, responseHeaders(response, extraHeaders), responseBody);
 }
 
 async function handle(req, res) {
@@ -154,10 +191,7 @@ async function handle(req, res) {
     }
 
     if (["/", "/activate", "/activate-plus", "/activate-team"].includes(pathname)) {
-      send(res, 200, {
-        "content-type": "text/html; charset=utf-8",
-        "cache-control": "no-store",
-      }, HTML);
+      await proxyPage(res);
       return;
     }
 
