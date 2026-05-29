@@ -5,7 +5,7 @@
 ## 联系方式
 
 - 售后QQ群：1072653807
-- 售后QQ群链接：https://qm.qq.com/q/GmN6NYIh6c
+- 售后QQ群链接：https://qm.qq.com/q/IUNycPdTMY
 - 代理QQ：191176548
 - 代理QQ链接：https://qm.qq.com/q/Bz7bx904XQ
 

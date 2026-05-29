@@ -6,7 +6,7 @@ const PORT = Number(process.env.PORT || 3000);
 const ASSET_VERSION = "1778483770";
 
 const QQ_GROUP_NUMBER = "1072653807";
-const QQ_GROUP_LINK = "https://qm.qq.com/q/GmN6NYIh6c";
+const QQ_GROUP_LINK = "https://qm.qq.com/q/IUNycPdTMY";
 const AGENT_QQ_NUMBER = "191176548";
 const AGENT_QQ_LINK = "https://qm.qq.com/q/Bz7bx904XQ";
 const CODEX_PURCHASE_LINK = "https://pay.ldxp.cn/item/jzpods";
