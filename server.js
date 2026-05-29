@@ -18,24 +18,54 @@ const HTML = `<!doctype html>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="light" />
   <title>PLUS成品号账号兑换</title>
-  <link rel="stylesheet" href="/static/reserve_activate_console.css?v=${ASSET_VERSION}" />
+  <link id="activate-console-style" rel="stylesheet" href="/static/reserve_activate_console.css" />
+  <style>
+    .loading-spinner-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 75vh;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .spinner-modern-simple {
+      width: 38px;
+      height: 38px;
+      border: 3.5px solid rgba(37, 99, 235, 0.08);
+      border-radius: 50%;
+      border-top-color: #2563eb;
+      animation: spin-simple 0.75s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    }
+    @keyframes spin-simple {
+      to { transform: rotate(360deg); }
+    }
+  </style>
   <script>
     window.TEAM_CONSOLE_BOOT = {
       apiBase: "",
-      assetVersion: "${ASSET_VERSION}"
+      assetVersion: String(Date.now()),
+      localMailboxHelperBase: "http://127.0.0.1:18765"
     };
+    (function () {
+      const stamp = Date.now();
+      const style = document.getElementById("activate-console-style");
+      if (style) {
+        style.href = \`/static/reserve_activate_console.css?v=\${stamp}\`;
+      }
+      const script = document.createElement("script");
+      script.defer = true;
+      script.src = \`/static/js/reserve_activate_console.js?v=\${stamp}\`;
+      document.head.appendChild(script);
+    })();
   </script>
-  <script defer src="/static/js/reserve_activate_console.js?v=${ASSET_VERSION}"></script>
 </head>
 <body class="activate-page">
   <div class="bg-orb bg-orb-a"></div>
   <div class="bg-orb bg-orb-b"></div>
   <div id="activate-app" class="app-shell">
-    <main class="loading-card">
-      <p class="eyebrow">PLUS GOPAY</p>
-      <h1>正在载入兑换页面</h1>
-      <p>请稍候，页面会自动准备卡号兑换功能。</p>
-    </main>
+    <div class="loading-spinner-wrapper">
+      <div class="spinner-modern-simple"></div>
+    </div>
   </div>
 </body>
 </html>`;
@@ -61,6 +91,9 @@ function proxyHeaders(req) {
     const lower = key.toLowerCase();
     if (["host", "connection", "content-length", "expect"].includes(lower)) continue;
     headers.set(key, Array.isArray(value) ? value.join(", ") : value);
+  }
+  if (!headers.has("user-agent")) {
+    headers.set("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome Safari");
   }
   return headers;
 }
@@ -125,26 +158,14 @@ function replacePurchaseLinkInConfig(buffer) {
   }
 }
 
-async function proxyPage(res) {
-  const response = await fetch(`${OLD_ORIGIN}/activate`, {
-    headers: {
-      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome Safari",
-      "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-    },
-  });
-  const body = await response.text();
-  send(res, response.status, responseHeaders(response, {
-    "content-type": "text/html; charset=utf-8",
-    "cache-control": "no-store",
-  }), body);
-}
-
 async function proxyStatic(req, res, pathname, search) {
   const versionedSearch = search || `?v=${ASSET_VERSION}`;
   const oldPath = pathname === "/static/js/reserve_activate_console.js"
     ? `/static/js/reserve_activate_console.js${versionedSearch}`
     : `${pathname}${versionedSearch}`;
-  const response = await fetch(`${OLD_ORIGIN}${oldPath}`);
+  const response = await fetch(`${OLD_ORIGIN}${oldPath}`, {
+    headers: proxyHeaders(req),
+  });
 
   if (pathname === "/static/js/reserve_activate_console.js") {
     const body = replaceContacts(await response.text());
@@ -191,7 +212,10 @@ async function handle(req, res) {
     }
 
     if (["/", "/activate", "/activate-plus", "/activate-team"].includes(pathname)) {
-      await proxyPage(res);
+      send(res, 200, {
+        "content-type": "text/html; charset=utf-8",
+        "cache-control": "no-store",
+      }, HTML);
       return;
     }
 
