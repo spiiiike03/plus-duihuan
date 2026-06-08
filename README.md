@@ -1,6 +1,6 @@
 # 卡号激活服务新联系方式站
 
-这个项目复用旧站的页面逻辑和接口，只替换底部联系方式模块。
+这个项目复用上游站的页面逻辑和接口，只替换底部联系方式模块。
 
 ## 联系方式
 
@@ -31,7 +31,7 @@ node server.js
 - `/activate-plus`
 - `/activate-team`
 
-这些页面里的提交、查询和处理接口会继续代理到旧站 `https://activate.amazo.indevs.in`。
+这些页面里的提交、查询和处理接口会继续代理到上游站 `https://act.youyushen.icu`。
 
 健康检查：
 
@@ -64,7 +64,7 @@ docker run -d --name activate-contact-site --restart unless-stopped -p 3000:3000
 - `https://你的域名/activate-plus`
 - `https://你的域名/activate-team`
 
-Vercel 会把这些路径重写到 Serverless Function，再由函数代理旧站接口和静态资源。
+Vercel 会把这些路径重写到 Serverless Function，再由函数代理上游站接口和静态资源。
 
 ## systemd 部署
 

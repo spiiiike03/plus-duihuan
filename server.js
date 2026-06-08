@@ -1,7 +1,7 @@
 const http = require("node:http");
 const { URL } = require("node:url");
 
-const OLD_ORIGIN = "https://activate.amazo.indevs.in";
+const UPSTREAM_ORIGIN = "https://act.youyushen.icu";
 const PORT = Number(process.env.PORT || 3000);
 const ASSET_VERSION = "1778483770";
 
@@ -163,7 +163,7 @@ async function proxyStatic(req, res, pathname, search) {
   const oldPath = pathname === "/static/js/reserve_activate_console.js"
     ? `/static/js/reserve_activate_console.js${versionedSearch}`
     : `${pathname}${versionedSearch}`;
-  const response = await fetch(`${OLD_ORIGIN}${oldPath}`, {
+  const response = await fetch(`${UPSTREAM_ORIGIN}${oldPath}`, {
     headers: proxyHeaders(req),
   });
 
@@ -182,7 +182,7 @@ async function proxyStatic(req, res, pathname, search) {
 
 async function proxyApi(req, res, pathname, search) {
   const body = ["GET", "HEAD"].includes(req.method || "") ? undefined : await readRequestBody(req);
-  const response = await fetch(`${OLD_ORIGIN}${pathname}${search}`, {
+  const response = await fetch(`${UPSTREAM_ORIGIN}${pathname}${search}`, {
     method: req.method,
     headers: proxyHeaders(req),
     body,
